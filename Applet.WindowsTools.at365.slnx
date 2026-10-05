@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Applet.WindowsTools/Applet.WindowsTools.csproj" />
+  <Project Path="Applet.WindowsTools.RegressionTests/Applet.WindowsTools.RegressionTests.csproj" />
+</Solution>
