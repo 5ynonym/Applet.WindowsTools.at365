@@ -4,7 +4,7 @@
 
 ## 必要なホスト
 
-**動的コマンド更新と `shortcut-list` 設定に対応した AppDock v0.4.0 が必要です。** 今回のホスト側変更は [AppDock の専用 worktree](../AppDock.at365.worktrees/windows-tools/) の `codex/windows-tools` ブランチにあります。元の AppDock main は変更していません。従来の v0.3.1 ではこのAppletは読み込めません。
+**動的コマンド更新と `shortcut-list` 設定に対応した AppDock v0.4.0 が必要です。** ホスト側変更は [AppDock](../AppDock.at365/) の main にマージ済みです。従来の v0.3.1 ではこのAppletは読み込めません。
 
 ## コマンドと設定
 
@@ -50,14 +50,14 @@ Appletの無効化・再起動・ホスト終了で消灯予約と監視を停�
 
 ## ビルド・配置
 
-.NET 10 SDKを使用します。現在は専用worktreeのSDKを既定の参照先としています。
+.NET 10 SDKを使用します。隣接する AppDock.at365 のSDKを既定の参照先としています。
 
 ```powershell
 dotnet build .\Applet.WindowsTools.at365.slnx -c Release
 .\publish.bat
 ```
 
-AppDockの変更をmainへ取り込んだ後など、別のSDKを使う場合:
+別の配置場所にあるAppDockのSDKを使う場合:
 
 ```powershell
 .\publish.bat -AppDockRoot "A:\30.PROJECT\AppDock.at365"

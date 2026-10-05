@@ -8,7 +8,7 @@
     <RootNamespace>Applets.WindowsTools</RootNamespace>
     <Version>0.1.0</Version>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
-    <AppDockRoot Condition="'$(AppDockRoot)' == ''">$(MSBuildThisFileDirectory)../../AppDock.at365.worktrees/windows-tools</AppDockRoot>
+    <AppDockRoot Condition="'$(AppDockRoot)' == ''">$(MSBuildThisFileDirectory)../../AppDock.at365</AppDockRoot>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="$(AppDockRoot)/dotnet/AppDock.SDK/AppDock.SDK.csproj" />
