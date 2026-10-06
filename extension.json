@@ -2,6 +2,7 @@
   "apiVersion": 1,
   "id": "at365.windows-tools",
   "name": "Applet.WindowsTools.at365",
+  "displayName": "WindowsTools.at365",
   "version": "0.1.1",
   "minimumHostVersion": "0.4.0",
   "updateRepository": "5ynonym/Applet.WindowsTools.at365",
