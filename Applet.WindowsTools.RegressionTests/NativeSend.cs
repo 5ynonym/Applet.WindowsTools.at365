@@ -21,7 +21,13 @@ internal static class NativeSend
             input.Focus(); Application.DoEvents();
             input.SelectionStart = input.TextLength; input.SelectionLength = 0;
             var cursor = Cursor.Position;
-            var task = new WindowsPlatform().SendAsync(KeyChord.Parse("Ctrl+A"), CancellationToken.None);
+            var platform = new WindowsPlatform();
+            var task = SendRepeatedly();
+            async Task SendRepeatedly()
+            {
+                for (var i = 0; i < 3; i++)
+                    await platform.SendAsync(KeyChord.Parse("Ctrl+A"), CancellationToken.None);
+            }
             var timer = Stopwatch.StartNew();
             while (!task.IsCompleted) {
                 if (timer.ElapsedMilliseconds > 5000) throw new TimeoutException();
@@ -31,7 +37,7 @@ internal static class NativeSend
             Console.WriteLine($"Selection={input.SelectionLength}/{input.TextLength}; inputFocused={input.Focused}; cursor={cursor}->{Cursor.Position}; foreground={GetForegroundWindow() == form.Handle}");
             if (input.SelectionLength != input.TextLength || Cursor.Position != cursor || GetForegroundWindow() != form.Handle)
                 throw new InvalidOperationException("Selection, cursor, or focus mismatch");
-            Console.WriteLine("PASS SendInput Ctrl+A to owned TextBox; selection, cursor and focus verified");
+            Console.WriteLine($"PASS three consecutive SendInput Ctrl+A calls in {timer.ElapsedMilliseconds}ms; selection, cursor and focus verified");
             return 0;
         }
         catch (Exception error) { Console.Error.WriteLine(error); return 1; }

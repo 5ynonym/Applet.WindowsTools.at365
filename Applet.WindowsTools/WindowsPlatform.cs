@@ -17,7 +17,6 @@ internal interface IWindowsPlatform
 internal sealed class WindowsPlatform : IWindowsPlatform
 {
     private static readonly int[] HeldModifiers = [0x10, 0x11, 0x12, 0x5B, 0x5C];
-    private long lastSend = long.MinValue / 2;
     public long Uptime => Environment.TickCount64;
     public uint LastInputTimestamp()
     {
@@ -48,8 +47,6 @@ internal sealed class WindowsPlatform : IWindowsPlatform
     public async Task SendAsync(KeyChord chord, CancellationToken token)
     {
         var target = Target();
-        // Break immediate feedback if a user assigns the sent chord as its own global trigger.
-        if (Uptime - lastSend < 500) throw new InvalidOperationException("キー送信の連続呼び出しを抑止しました。呼び出すキーと送信するキーを別にしてください。");
         var started = Uptime;
         // Let the invoking hotkey go up. Never release keys physically held by the user.
         do
@@ -57,14 +54,13 @@ internal sealed class WindowsPlatform : IWindowsPlatform
             await Task.Delay(25, token);
             if (GetForegroundWindow() != target) throw new InvalidOperationException("最前面のウィンドウが変わったためキー送信を中止しました。");
             if (Uptime - started >= 2000) throw new InvalidOperationException("修飾キーを離してから再実行してください。");
-        } while (Uptime - started < 150 || HeldModifiers.Any(Pressed) || Pressed(chord.Key));
+        } while (HeldModifiers.Any(Pressed) || Pressed(chord.Key));
         token.ThrowIfCancellationRequested();
         var events = new List<Input>();
         foreach (var modifier in chord.Modifiers) events.Add(KeyEvent(modifier, false, modifier == 0x5B));
         events.Add(KeyEvent(chord.Key, false, chord.Extended));
         events.Add(KeyEvent(chord.Key, true, chord.Extended));
         foreach (var modifier in chord.Modifiers.Reverse()) events.Add(KeyEvent(modifier, true, modifier == 0x5B));
-        lastSend = Uptime;
         var sent = SendInput((uint)events.Count, events.ToArray(), Marshal.SizeOf<Input>());
         if (sent != events.Count)
         {
