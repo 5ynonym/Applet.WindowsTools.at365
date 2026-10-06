@@ -89,3 +89,7 @@ dotnet run --project .\Applet.WindowsTools.RegressionTests -c Release
 [scripts/test-host.cjs](scripts/test-host.cjs) は専用プロファイルでAppDockを起動し、設定画面からの追加・変更・削除、動的ホットキーの登録解除、取消、再起動と停止を検証します。NodeとPlaywrightはAppDock側の依存を使用します。第1引数にホストソースのパス、第2引数に配布版EXEのパスを指定すると配布版でも検証できます。
 
 実測結果は [VERIFICATION.md](VERIFICATION.md) に記載します。
+
+## v0.1.1 のバージョン確認
+
+AppDock v0.5.0では共通の「開始までの秒数」で遅延起動でき、手動の「更新を確認」でGitHubの正式リリースを確認できます。manifestに必要なAppDockの最小バージョンと更新確認先を記録しています。
