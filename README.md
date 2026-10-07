@@ -2,9 +2,17 @@
 
 最前面アプリのフォルダー表示、消灯予約、設定で追加できるショートカットキー送信、無操作時のPCロックを提供する AppDock 用 DLL Applet です。
 
-## 必要なホスト
+## 動作環境
 
-**動的コマンド更新と `shortcut-list` 設定に対応した AppDock v0.4.0 が必要です。** ホスト側変更は [AppDock](../AppDock.at365/) の main にマージ済みです。従来の v0.3.1 ではこのAppletは読み込めません。
+**Windows x64 / AppDock 0.4.0以降**が必要です。AppDock 0.3.1では利用できません。
+
+## 導入・更新
+
+1. AppDockをトレイの「終了」から完全終了します。
+2. 配布物の `extension.json`、`Applet.WindowsTools.at365.dll`、`Applet.WindowsTools.at365.deps.json` を、AppDock.at365.exeの隣の `extensions/Applet.WindowsTools.at365/` に配置します。更新時も配布物一式をそろえて置き換えてください。
+3. AppDockを起動し、「Applet」一覧で有効にします。操作やキーの割り当てはAppDockから行います。
+
+利用するPCにはAppDockの動作環境が必要です。詳細は[AppDockの導入案内](../AppDock.at365/README.md)を参照してください。
 
 ## コマンドと設定
 
@@ -29,9 +37,9 @@ Appletの無効化・再起動・ホスト終了で消灯予約と監視を停�
 
 ### Watch との対応
 
-- Watch の `OpenCurrentProcessFolder` はプロセスの実行ファイルの場所を開く機能です。WindowsToolsも同じ動作です。エクスプローラーで閲覧しているフォルダーや、エディターで編集中の文書のフォルダー、プロセス内部の作業ディレクトリを取得する機能ではありません。
+- Watch の「最前面アプリのフォルダーを開く」はプロセスの実行ファイルの場所を開く機能です。WindowsToolsも同じ動作です。エクスプローラーで閲覧しているフォルダーや、エディターで編集中の文書のフォルダー、プロセス内部の作業ディレクトリを取得する機能ではありません。
 - Watch の消灯用ショートカットは1秒待機でした。WindowsToolsでは秒数を設定できます。
-- Watch の自動ロックはマウスのみ・6時間固定でした。今回の「PCの操作がなかった場合」に合わせて、WindowsToolsは `GetLastInputInfo` によるマウスとキーボードの無操作時間を使い、分単位で変更できます。
+- Watch の自動ロックはマウスのみ・6時間固定でした。今回の「PCの操作がなかった場合」に合わせて、WindowsToolsは マウスとキーボードの無操作時間を使い、分単位で変更できます。
 
 ### キー送信を追加する
 
@@ -44,52 +52,14 @@ Appletの無効化・再起動・ホスト終了で消灯予約と監視を停�
 
 送信キーは `Ctrl` / `Alt` / `Shift` / `Win` と、英数字、F1〜F24、Enter、Tab、Escape、Space、Backspace、Delete、Insert、Home、End、PageUp、PageDown、Left、Right、Up、Down の組み合わせです。例: `Ctrl+Shift+T`、`Alt+F4`、`Win+E`。1コマンドは1組のキー操作です。文字列の入力や従来のSendKeys独自構文（`%{F4}`など）は扱いません。
 
-呼び出し用のキーと送信キーは別の組み合わせにし、ほかのキー送信コマンドを呼び出す循環も避けてください。500ms以内の連続送信を拒否する制限はありません。送信前は25ms間隔で修飾キーと送信対象キーが離れたことを確認し、最大2秒待機します。最前面ウィンドウが途中で変わった場合は送信を中止します。送信後は即時の再呼び出しを抑えるため150msだけ実行中の状態を維持します（AppDockは同じグローバルショートカットの実行中の再呼び出しを受け付けません）。送信にはWin32の `SendInput` を使います。管理者権限のアプリや保護された画面への送信にはWindowsの制限があります。
+呼び出し用のキーと送信キーは別の組み合わせにし、ほかのキー送信コマンドを呼び出す循環も避けてください。500ms以内の連続送信を拒否する制限はありません。送信前は修飾キーと送信対象キーが離れるまで、最大2秒待機します。最前面ウィンドウが途中で変わった場合は送信を中止します。送信後は即時の再呼び出しを抑えるため150msだけ実行中の状態を維持します（AppDockは同じグローバルショートカットの実行中の再呼び出しを受け付けません）。管理者権限のアプリや保護された画面への送信にはWindowsの制限があります。
 
 フォルダー表示とキー送信は、**実行時の最前面アプリ**が対象です。AppDockの画面から実行するとAppDock自身が対象になります。別のアプリを操作するときは、そのコマンドへグローバルショートカットを割り当ててください。送信側は `Win` に対応しますが、既存AppDockの呼び出し用キー設定はWindowsキー未対応です。
 
-## ビルド・配置
+## 遅延開始・更新の確認
 
-.NET 10 SDKを使用します。隣接する AppDock.at365 のSDKを既定の参照先としています。
+AppDock 0.5.0以降では「開始までの秒数」で遅延起動でき、「更新を確認」でGitHubの正式リリースを手動で確認できます。
 
-```powershell
-dotnet build .\Applet.WindowsTools.at365.slnx -c Release
-.\publish.bat
-```
+---
 
-別の配置場所にあるAppDockのSDKを使う場合:
-
-```powershell
-.\publish.bat -AppDockRoot "A:\30.PROJECT\AppDock.at365"
-# ソリューション全体のビルド時は -p:AppDockRoot=... を指定
-```
-
-発行先は [publish/Applet.WindowsTools.at365](publish/Applet.WindowsTools.at365/) です。`-OutputDirectory` で変更できます。
-
-動的コマンド対応版AppDockを終了し、そのEXEがあるフォルダーを指定して配置します。
-
-```powershell
-.\deploy.bat "A:\Apps\AppDock.at365"
-```
-
-引数なしの場合は無視対象の `deploy.local.txt` の1行目を使います。[記入例](deploy.local.txt.example)も参照してください。どちらも未指定なら配置しません。`deploy.bat` は既定の発行先からDLL・deps.json・manifestを `extensions/Applet.WindowsTools.at365` へコピーします。AppDock.SDKはホストが供給します。
-
-AppDockを起動し直してAppletを有効にしてください。既定では自動ロックは無効、キー送信一覧は空です。実利用環境への配置・自動ロックの有効化はこの実装作業では行っていません。
-
-## 検証
-
-```powershell
-dotnet run --project .\Applet.WindowsTools.RegressionTests -c Release
-```
-
-消灯・ロック・待ち時間のテストは模擬APIと仮想時刻を使用します。
-
-`--native-send` を付けると、テスト専用のテキストボックスへCtrl+Aを送って確認します。一時的にテスト画面へフォーカスを移すので、他のUIテストや手操作と同時に実行しないでください。
-
-[scripts/test-host.cjs](scripts/test-host.cjs) は専用プロファイルでAppDockを起動し、設定画面からの追加・変更・削除、動的ホットキーの登録解除、取消、再起動と停止を検証します。NodeとPlaywrightはAppDock側の依存を使用します。第1引数にホストソースのパス、第2引数に配布版EXEのパスを指定すると配布版でも検証できます。
-
-実測結果は [VERIFICATION.md](VERIFICATION.md) に記載します。
-
-## v0.1.1 のバージョン確認
-
-AppDock v0.5.0では共通の「開始までの秒数」で遅延起動でき、手動の「更新を確認」でGitHubの正式リリースを確認できます。manifestに必要なAppDockの最小バージョンと更新確認先を記録しています。
+開発・ビルドについては[開発ガイド](DEVELOPMENT.md)を参照してください。
