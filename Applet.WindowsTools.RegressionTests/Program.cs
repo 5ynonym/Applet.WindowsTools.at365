@@ -142,6 +142,7 @@ internal static class Program
         public IDisposable OnChanged(Func<CancellationToken, Task> handler) { Changed = handler; return new Release(() => Changed = null); }
         public Task SetOptionsAsync(string key, IReadOnlyList<SettingOption> options, CancellationToken token = default) => throw new NotSupportedException();
         public Task ShowPanelAsync(AppDock.SDK.Panel panel, CancellationToken token = default) => Task.CompletedTask;
+        public Task<string> GetImageDirectoryAsync(CancellationToken token = default) => throw new NotSupportedException();
         public IDisposable Every(TimeSpan interval, Func<CancellationToken, Task> callback) { Timer = callback; return new Release(() => Timer = null); }
         public Task Execute(string suffix) => Handlers[ExtensionId + "." + suffix](default);
         public Task Tick() => Timer!(default);
