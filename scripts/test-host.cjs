@@ -6,7 +6,7 @@ const host = path.resolve(process.argv[2] || path.join(root, '../AppDock.at365')
 const packaged = process.argv[3] ? path.resolve(process.argv[3]) : null;
 const { _electron: electron } = require(path.join(host, 'node_modules/playwright'));
 const { createDefaultSettings } = require(path.join(host, 'out/main/shared/settings-schema.js'));
-const profile = path.join(root, 'artifacts', `host-${Date.now()}`);
+const profile = path.join(root, '.artifacts', `host-${Date.now()}`);
 const folder = path.join(profile, 'extensions/Applet.WindowsTools.at365');
 fs.mkdirSync(folder, { recursive: true });
 for (const name of ['extension.json', 'Applet.WindowsTools.at365.dll', 'Applet.WindowsTools.at365.deps.json'])
