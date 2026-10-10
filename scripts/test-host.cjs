@@ -16,8 +16,7 @@ const dynamicId = id + '.send.shortcut-1';
 const settings = createDefaultSettings();
 settings.host.notifications = false;
 settings.extensions[id] = { enabled: true, settings: { displayOffSeconds: 3600, autoLockEnabled: false } };
-settings.shortcuts[dynamicId] = ['Ctrl+Alt+F19'];
-settings.globalShortcutCommands.push(dynamicId);
+settings.keybindings = [{ id: 'test-dynamic-key', command: dynamicId, key: 'Ctrl+Alt+F19', enabled: true, when: { scope: 'global', appletIds: [] } }];
 fs.writeFileSync(path.join(profile, 'settings.json'), JSON.stringify(settings));
 let application;
 async function snapshot(page) { return page.evaluate(() => window.dock.snapshot()); }
@@ -35,10 +34,11 @@ async function state(page) { return (await snapshot(page)).extensions.find(e => 
     });
     const page = await application.firstWindow();
     await page.getByRole('heading', { name: 'ホーム', exact: true }).waitFor();
-    await until(async () => (await state(page))?.commands.length === 4, 'Initial 4 commands missing');
+    await until(async () => (await state(page))?.commands.length === 4 && (await state(page)).state === 'running', 'Initial 4 commands missing');
     assert.equal((await state(page)).state, 'running');
-    await page.keyboard.press('Control+,');
-    await page.locator('.settings-applet-list').getByRole('button', { name: 'Applet.WindowsTools.at365', exact: true }).click();
+    await page.getByRole('button', { name: 'Applet', exact: true }).click();
+    await page.getByRole('button', { name: 'WindowsTools.at365', exact: false }).first().click();
+    await page.getByRole('tab', { name: '設定', exact: true }).click();
     await page.getByRole('button', { name: 'コマンドを追加', exact: true }).click();
     await page.getByLabel('送信するショートカット 1 名前', { exact: true }).fill('全選択テスト');
     await page.getByLabel('送信するショートカット 1 キー', { exact: true }).fill('Ctrl+A');
@@ -54,7 +54,13 @@ async function state(page) { return (await snapshot(page)).extensions.find(e => 
     await until(async () => (await state(page)).commands.length === 4, 'Dynamic delete failed');
     await until(async () => !(await snapshot(page)).globalHotKeys.some(h => h.commandId === dynamicId && h.registered), 'Removed hotkey remains registered');
     await assert.rejects(page.evaluate(command => window.dock.executeCommand(command), dynamicId), /利用できません/);
-    // The hour-long reservation is canceled immediately; the display is never actually switched off.
+    await require('./settings-mcp-check.cjs')({ host, profile, page, id,
+      keys: ['displayOffSeconds'], changes: { displayOffSeconds: 1800 },
+      invalid: [{ displayOffSeconds: 0 }, { displayOffSeconds: 3601 }, { displayOffSeconds: 1200, autoLockEnabled: true }, { autoLockMinutes: 1 }, { shortcuts: [] }],
+      hidden: ['autoLockEnabled', 'autoLockMinutes', 'shortcuts'] });
+    await until(async () => (await state(page)).panel.facts[0].value.includes('1800秒'), 'MCP setting did not reach runtime');
+    assert.equal((await snapshot(page)).settings.value.extensions[id].settings.autoLockEnabled, false);
+    // The half-hour reservation is canceled immediately; the display is never actually switched off.
     await page.evaluate(command => window.dock.executeCommand(command), id + '.display-off');
     assert.match((await state(page)).panel.facts[0].value, /予約中/);
     await page.evaluate(command => window.dock.executeCommand(command), id + '.cancel-display-off');
@@ -65,7 +71,9 @@ async function state(page) { return (await snapshot(page)).extensions.find(e => 
     await until(async () => (await state(page)).state === 'stopped', 'Deactivate failed');
     assert.equal((await state(page)).commands.length, 0);
     const errors = (await snapshot(page)).logs.filter(entry => entry.level === 'error');
-    assert.equal(errors.length, 0, JSON.stringify(errors));
+    assert.equal(errors.filter(e => e.source === 'host' && e.message === 'dock:executeCommand: このコマンドは現在利用できません。').length, 1, 'stale command rejection logged once');
+    assert.deepEqual(errors.filter(e => !(e.source === 'host' && e.message === 'dock:executeCommand: このコマンドは現在利用できません。')), []);
+    fs.writeFileSync(path.join(profile, 'result.json'), JSON.stringify({ok:true, packaged, checks:['MCP display countdown / exclusions / permissions / dryRun / conflicts / validation / runtime', 'dynamic shortcuts / countdown cancel / lifecycle']}));
     console.log('PASS live settings add/rename/delete, global registration/removal, rejected stale command, countdown/cancel, restart, deactivate');
     console.log(profile);
   } finally {

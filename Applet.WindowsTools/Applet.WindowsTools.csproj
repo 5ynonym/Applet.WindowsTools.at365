@@ -6,7 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Applet.WindowsTools.at365</AssemblyName>
     <RootNamespace>Applets.WindowsTools</RootNamespace>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
     <AppDockRoot Condition="'$(AppDockRoot)' == ''">$(MSBuildThisFileDirectory)../../AppDock.at365</AppDockRoot>
   </PropertyGroup>

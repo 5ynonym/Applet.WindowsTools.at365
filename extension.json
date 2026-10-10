@@ -3,8 +3,8 @@
   "id": "at365.windows-tools",
   "name": "Applet.WindowsTools.at365",
   "displayName": "WindowsTools.at365",
-  "version": "0.1.1",
-  "minimumHostVersion": "0.4.0",
+  "version": "0.1.2",
+  "minimumHostVersion": "0.26.30",
   "updateRepository": "5ynonym/Applet.WindowsTools.at365",
   "runtime": "dotnet",
   "entry": "Applet.WindowsTools.at365.dll",
@@ -12,7 +12,7 @@
   "description": "アプリのフォルダー表示、消灯予約、設定したキーの送信、無操作時の自動ロック。動的コマンド対応のAppDockが必要です。",
   "capabilities": ["ui", "settings", "dynamic-commands"],
   "settings": [
-    { "key": "displayOffSeconds", "title": "消灯までの秒数", "type": "number", "default": 5, "minimum": 1, "maximum": 3600, "step": 1, "description": "消灯コマンドからの待ち時間。再実行すると予約し直します。" },
+    { "key": "displayOffSeconds", "automation": true, "title": "消灯までの秒数", "type": "number", "default": 5, "minimum": 1, "maximum": 3600, "step": 1, "description": "消灯コマンドからの待ち時間。再実行すると予約し直します。" },
     { "key": "autoLockEnabled", "title": "無操作時の自動ロック", "type": "boolean", "default": false, "description": "マウスとキーボードの操作がない場合にロックします。有効にした時点から監視します。" },
     { "key": "autoLockMinutes", "title": "ロックまでの無操作時間（分）", "type": "number", "default": 360, "minimum": 1, "maximum": 1440, "step": 1, "description": "1〜1440分。変更時には監視時間をリセットします。" },
     { "key": "shortcuts", "title": "送信するショートカット", "type": "shortcut-list", "default": [], "description": "最大32件。ID・名前・送信キーを追加して保存すると、起動中のコマンド一覧へ反映します。IDは小文字英数字とハイフンで指定してください。" }
